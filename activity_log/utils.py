@@ -18,7 +18,7 @@ try:
     pipeline = joblib.load(MODEL_PATH)
 except Exception as e:
     # any errors here will show up in your server logs
-    print(f"❌ Failed to load XGB pipeline from {MODEL_PATH}: {e}")
+    print(f"Failed to load XGB pipeline from {MODEL_PATH}: {e}")
     pipeline = None
 
 # ─── PREDICTION FUNCTION ──────────────────────────────────────────────────────
@@ -57,5 +57,5 @@ def estimate_calories(activity_name: str,
         return round(scaled_pred, 2)
 
     except Exception as e:
-        print(f"❌ Calorie prediction error: {e}")
+        print(f"Calorie prediction error: {e}")
         return 0.0
