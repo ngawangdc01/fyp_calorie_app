@@ -14,7 +14,7 @@ from packaging import version
 USE_GPU = False  # Set to True if you have a CUDA-capable GPU
 
 # === Load and scale dataset ===
-df = pd.read_csv("proportional_calorie_dataset.csv")
+df = pd.read_csv("cleaned_calorie_dataset.csv")
 
 # ✅ Nonlinear weight-based calorie scaling
 base_weight = 58.9670782266331
@@ -68,7 +68,7 @@ xgb_pipeline.fit(X_train, y_train)
 # === Evaluate
 y_pred = xgb_pipeline.predict(X_test)
 
-print("\n📊 XGBoost Evaluation (with TargetEncoder + nonlinear weight scaling):")
+print("\n XGBoost Evaluation (with TargetEncoder + nonlinear weight scaling):")
 print(f"MAE:  {mean_absolute_error(y_test, y_pred):.2f}")
 print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_pred)):.2f}")
 print(f"R²:   {r2_score(y_test, y_pred):.4f}")
