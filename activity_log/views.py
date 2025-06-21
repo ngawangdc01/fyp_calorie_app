@@ -439,3 +439,5 @@ def download_calorie_report(request):
         return response
 
     return HttpResponse("Method not allowed", status=405)
+
+print('Hello World')
