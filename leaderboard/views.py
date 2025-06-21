@@ -43,7 +43,3 @@ def toggle_leaderboard_visibility(request):
     user.is_visible_in_leaderboard = is_visible
     user.save(update_fields=["is_visible_in_leaderboard"])
     return JsonResponse({"success": True, "is_visible": user.is_visible_in_leaderboard})
-
-# @login_required
-# def leaderboard(request):
-#     return render(request, 'leaderboard/leaderboard.html')

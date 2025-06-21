@@ -64,24 +64,6 @@ def create_discussion(request):
 
     return render(request, 'discussion/discussion_form_modal.html', {'form': form, 'action': 'Create'})
 
-# Edit discussion (modal only)
-# @login_required
-# def edit_discussion(request, pk):
-#     discussion = get_object_or_404(Discussion, pk=pk)
-#     if request.user != discussion.user:
-#         return HttpResponseForbidden()
-
-#     if request.method == 'POST':
-#         form = DiscussionForm(request.POST, request.FILES, instance=discussion)
-#         if form.is_valid():
-#             form.save()
-#             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-#                 return HttpResponse('<script>closeModal(); window.location.reload();</script>')
-#             return redirect('discussion_list')
-#     else:
-#         form = DiscussionForm(instance=discussion)
-
-#     return render(request, 'discussion/discussion_form_modal.html', {'form': form, 'action': 'Edit'})
 @login_required
 def edit_discussion(request, pk):
     discussion = get_object_or_404(Discussion, pk=pk)
