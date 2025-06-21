@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: var(--bg-light);
+    }
+    
+    .auth-container {
+        padding: 0;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin: 2rem;
+        max-width: 1200px;
+        width: calc(100% - 4rem);
+    }
+    
+    .auth-image-side {
+        background-color: var(--primary-fade);
+        position: relative;
+        overflow: hidden;
+        min-height: 100%;
+        padding: 0;
+    }
+    
+    .auth-image-side img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    
+    .auth-form-side {
+        background-color: var(--bg-white);
+        padding: 3rem;
+        overflow-y: auto;
+        max-height: 100vh;
+    }
+    
+    .auth-title {
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 1.75rem;
+    }
+    
+    .auth-subtitle {
+        color: var(--text-medium);
+        margin-bottom: 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .form-control {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-fade);
+        outline: none;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-light);
+    }
+    
+    .btn-primary:active {
+        background-color: var(--primary-dark);
+    }
+    
+    .auth-footer {
+        margin-top: 1.5rem;
+        color: var(--text-medium);
+    }
+    
+    .auth-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .auth-link:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+    
+    .section-divider {
+        margin: 1.5rem 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+    }
+    
+    .section-title {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .form-check-input {
+        cursor: pointer;
+        margin-right: 0.5rem;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+        color: var(--text-medium);
+    }
+    
+    .form-label {
+        color: var(--text-medium);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-with-icon {
+        position: relative;
+    }
+    
+    .input-with-icon i {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+    }
+</style>
+<div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+    <div class="auth-container row">
+        <!-- Left Image Section -->
+        <div class="col-md-6 auth-image-side d-none d-md-block">
+            <img src="{% static 'images/Login_Image.png' %}" alt="Registration Image">
+        </div>
+
+        <!-- Right Form Section -->
+        <div class="col-md-6 auth-form-side">           
+            <h2 class="auth-title">Create Account</h2>
+            <p class="auth-subtitle">Start your fitness journey with us</p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="section-title">Account Information</div>
+                
+                <div class="form-group">
+                    {{ form.email }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.username }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.password1 }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.password2 }}
+                </div>
+                
+                <div class="section-divider"></div>
+                <div class="section-title">Personal Metrics</div>
+                
+                <div class="form-group mb-3">
+                    <label class="form-label">Your Gender:</label>
+                    <div class="d-flex gap-4">
+                        {% for radio in form.gender %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label">{{ radio.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>                    
+                
+                <div class="form-group">
+                    {{ form.height }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.weight }}
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mt-2">Create Account</button>
+            </form> 
+            
+            <p class="auth-footer">
+                Already have an account?
+                <a href="{% url 'login' %}" class="auth-link">Sign In</a>
+            </p>                               
+        </div>
+    </div>
+</div>
+{% endblock %}

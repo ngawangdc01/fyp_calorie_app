@@ -1,0 +1,230 @@
+{% extends "sidebar_layout.html" %}
+{% load static %}
+{% block title %}Calorie Report{% endblock %}
+
+{% block page_content %}
+<style>
+    body {
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+    }
+
+    section { 
+        margin-bottom: 32px; 
+        background-color: var(--bg-white);
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 18px 24px;
+        background-color: var(--bg-light);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+    }
+
+    .section-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .section-header i {
+        margin-right: 10px;
+        color: var(--primary);
+    }
+
+    .section-content {
+        padding: 24px;
+    }
+
+    .summary-bar {
+        background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-bar h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .icon-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .icon-button:hover {
+        background-color: var(--primary-fade);
+    }
+
+    canvas {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .download-link {
+        display: inline-flex;
+        align-items: center;
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 6px 2px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .download-link:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .pdf-icon {
+        margin-right: 8px;
+    }
+</style>
+
+<div class="summary-bar">
+    <h3>Your Calorie Report</h3>
+</div>
+
+<section>
+    <div class="section-header" style="display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="chart-no-axes-combined" class="lucide" style="width: 20px; height: 20px;"></i>
+        <h4>Calories Burned in the</h4>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <button id="left-btn" class="icon-button" onclick="changeRange(-1)" title="Previous Range">
+                <i data-lucide="chevron-left" class="lucide" style="width: 20px; height: 20px;  color: #0d6efd;"></i>
+            </button>
+
+            <span id="range-label" style="font-size: 18px; font-weight: 600; color: var(--text-dark);">
+                Last 7 Days
+            </span>
+
+            <button id="right-btn" class="icon-button" onclick="changeRange(1)" title="Next Range">
+                <i data-lucide="chevron-right" class="lucide" style="width: 20px; height: 20px;  color: #0d6efd;"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="section-content">
+        <canvas id="calorieChart" height="300"></canvas>
+    </div>
+</section>
+
+<section>
+    <div class="section-header" style="display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="download" class="lucide" style="width: 20px; height: 20px;"></i>
+        <h4>Download Your Report</h4>
+    </div>
+    <div class="section-content">
+        <form id="download-pdf-form" method="POST" action="{% url 'download_calorie_report' %}?days={{ days }}">
+            {% csrf_token %}
+            <input type="hidden" id="chart_image" name="chart_image">
+            <input type="hidden" name="days" value="{{ days }}">
+            <button type="submit" class="download-link">
+                <i data-lucide="file-text" class="lucide pdf-icon" style="width: 18px; height: 18px;"></i>
+                Download calorie_report.pdf
+            </button>
+        </form>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('calorieChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Calories Burned',
+                data: {{ values|safe }},
+                fill: true,
+                tension: 0.3,
+                backgroundColor: 'rgba(211, 47, 47, 0.1)', // Updated to match --primary with transparency
+                borderColor: '#D32F2F', // Updated to match --primary
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: '#D32F2F', // Updated to match --primary
+                pointHoverRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Calories' }
+                },
+                x: {
+                    title: { display: true, text: 'Date' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            }
+        }
+    });
+
+    const daysValue = {{ days }};  // Get real days value from Django
+    const daysOptions = [60, 30, 7];
+    const ranges = ["Last 60 Days", "Last 30 Days", "Last 7 Days"];
+    let currentIndex = daysOptions.indexOf(daysValue);  // Set correctly
+
+    function updateUI() {
+        const label = document.getElementById("range-label");
+        const leftBtn = document.getElementById("left-btn");
+        const rightBtn = document.getElementById("right-btn");
+
+        label.innerText = ranges[currentIndex];
+
+        leftBtn.disabled = currentIndex === 0;
+        leftBtn.style.opacity = currentIndex === 0 ? 0.4 : 1;
+        leftBtn.style.cursor = currentIndex === 0 ? "not-allowed" : "pointer";
+
+        rightBtn.disabled = currentIndex === 2;
+        rightBtn.style.opacity = currentIndex === 2 ? 0.4 : 1;
+        rightBtn.style.cursor = currentIndex === 2 ? "not-allowed" : "pointer";
+    }
+
+    function changeRange(direction) {
+        const newIndex = currentIndex + direction;
+        if (newIndex >= 0 && newIndex <= 2) {
+            const selectedDays = daysOptions[newIndex];
+            window.location.href = `?days=${selectedDays}`;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", updateUI);
+
+    document.getElementById('download-pdf-form').addEventListener('submit', function () {
+        const chartImageBase64 = chart.toBase64Image();
+        document.getElementById('chart_image').value = chartImageBase64;
+    });
+</script>
+{% endblock %}

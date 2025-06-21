@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block main_wrapper %}
+<style>
+    #custom-modal::-webkit-scrollbar {
+        display: none;
+    }
+
+    .popup-messages-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 360px;
+    }
+
+    .popup-message {
+        display: flex;
+        align-items: center;
+        background-color: var(--bg-white);
+        color: var(--text-dark);
+        padding: 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        position: relative;
+        animation: slideIn 0.3s ease forwards;
+        overflow: hidden;
+    }
+
+    .popup-icon {
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+    }
+
+    .popup-content {
+        flex: 1;
+        padding-right: 24px;
+    }
+
+    .popup-message[data-tag="success"] {
+        border-left: 4px solid var(--primary);
+    }
+
+    .popup-message[data-tag="success"] .popup-icon {
+        color: var(--primary);
+    }
+
+    .popup-message[data-tag="error"] {
+        border-left: 4px solid var(--danger);
+    }
+
+    .popup-message[data-tag="error"] .popup-icon {
+        color: var(--danger);
+    }
+
+    .popup-message[data-tag="info"] {
+        border-left: 4px solid var(--info);
+    }
+
+    .popup-message[data-tag="info"] .popup-icon {
+        color: var(--info);
+    }
+
+    .popup-message[data-tag="warning"] {
+        border-left: 4px solid var(--warning);
+    }
+
+    .popup-message[data-tag="warning"] .popup-icon {
+        color: var(--warning);
+    }
+
+    .popup-close {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-light);
+        transition: all 0.2s;
+        border-radius: 50%;
+    }
+
+    .popup-close:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-dark);
+    }
+
+    .popup-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background-color: var(--primary-fade);
+        width: 100%;
+    }
+
+    .popup-progress::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: var(--primary);
+        animation: progress 5s linear forwards;
+    }
+
+    .popup-message[data-tag="error"] .popup-progress::after {
+        background-color: var(--danger);
+    }
+
+    .popup-message[data-tag="info"] .popup-progress::after {
+        background-color: var(--info);
+    }
+
+    .popup-message[data-tag="warning"] .popup-progress::after {
+        background-color: var(--warning);
+    }
+
+    @keyframes slideIn {
+        from { 
+            opacity: 0; 
+            transform: translateX(30px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+    }
+
+    @keyframes slideOut {
+        from { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+        to { 
+            opacity: 0; 
+            transform: translateX(30px); 
+        }
+    }
+
+    @keyframes progress {
+        from { width: 100%; }
+        to { width: 0%; }
+    }
+</style>
+
+{% if messages %}
+<div id="popup-messages-container" class="popup-messages-container">
+    {% for message in messages %}
+    <div class="popup-message" data-tag="{{ message.tags }}">
+        <div class="popup-icon">
+            {% if message.tags == 'success' %}
+                <i data-lucide="check-circle" class="lucide" style="width: 24px; height: 24px;"></i>
+            {% elif message.tags == 'error' %}
+                <i data-lucide="alert-circle" class="lucide" style="width: 24px; height: 24px;"></i>
+            {% elif message.tags == 'info' %}
+                <i data-lucide="info" class="lucide" style="width: 24px; height: 24px;"></i>
+            {% elif message.tags == 'warning' %}
+                <i data-lucide="alert-triangle" class="lucide" style="width: 24px; height: 24px;"></i>
+            {% else %}
+                <i data-lucide="bell" class="lucide" style="width: 24px; height: 24px;"></i>
+            {% endif %}
+        </div>
+        <div class="popup-content">{{ message }}</div>
+        <span class="popup-close" onclick="dismissNotification(this.parentElement)">
+            <i data-lucide="x" class="lucide" style="width: 16px; height: 16px;"></i>
+        </span>
+        <div class="popup-progress"></div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container-fluid">
+    <div class="row min-vh-100">
+        {% include "sidebar.html" %}
+        <div class="col-md-9" style="padding: 5rem;">
+            {% block page_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div id="modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1040;"></div>
+
+<!-- Scrollable Modal Box -->
+<!-- <div id="custom-modal"
+     style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1050;
+            background:#fff; border-radius:12px; max-width:700px; width:90%; max-height:90vh; overflow-y:auto;
+            padding:0; box-shadow:0 0 20px rgba(0,0,0,0.2); transition: opacity 0.3s ease;">
+    <div id="modal-content"></div>
+</div> -->
+<div id="custom-modal"
+     style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1050;
+            background:#fff; border-radius:12px; max-width:700px; width:90%; max-height:90vh; 
+            padding:0; box-shadow:0 0 20px rgba(0,0,0,0.2); transition: opacity 0.3s ease;
+            overflow-y: scroll; scrollbar-width: none; -ms-overflow-style: none;">
+    <div id="modal-content"></div>
+</div>
+
+<script>
+    function openModal(contentUrl) {
+        fetch(contentUrl, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('modal-content').innerHTML = html;
+            document.getElementById('custom-modal').style.display = 'block';
+            document.getElementById('modal-backdrop').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // 🚫 Disable page scroll
+        });
+    }
+    
+    function closeModal() {
+        document.getElementById('custom-modal').style.display = 'none';
+        document.getElementById('modal-backdrop').style.display = 'none';
+        document.getElementById('modal-content').innerHTML = '';
+        document.body.style.overflow = ''; // ✅ Re-enable scroll
+    }
+    
+    // Close modal when clicking the backdrop
+    document.addEventListener('click', function (e) {
+        if (e.target.id === 'modal-backdrop') {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+    });
+
+    // Add this to your existing script section
+    function dismissNotification(element) {
+        element.style.animation = "slideOut 0.3s ease forwards";
+        setTimeout(() => {
+            element.remove();
+        }, 300);
+    }
+
+    // Auto-dismiss notifications
+    document.addEventListener('DOMContentLoaded', function() {
+        const notifications = document.querySelectorAll('.popup-message');
+        notifications.forEach(notification => {
+            // Start auto-dismiss timer
+            setTimeout(() => {
+                if (notification && notification.parentNode) {
+                    dismissNotification(notification);
+                }
+            }, 5000); // 5 seconds
+
+            // Pause timer on hover
+            notification.addEventListener('mouseenter', function() {
+                const progressBar = this.querySelector('.popup-progress::after');
+                if (progressBar) {
+                    progressBar.style.animationPlayState = 'paused';
+                }
+            });
+
+            // Resume timer on mouse leave
+            notification.addEventListener('mouseleave', function() {
+                const progressBar = this.querySelector('.popup-progress::after');
+                if (progressBar) {
+                    progressBar.style.animationPlayState = 'running';
+                }
+            });
+        });
+    });
+
+    // Helper to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // This is the missing function you must define inside modal
+    function confirmDeleteReply(replyId) {
+        if (confirm('Are you sure you want to delete this reply?')) {
+            fetch(`/discussions/reply/${replyId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    closeModal();
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete reply.');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting reply:', error);
+                alert('Error deleting reply.');
+            });
+        }
+    }
+</script>
+{% endblock %}

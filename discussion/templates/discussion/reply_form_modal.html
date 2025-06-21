@@ -1,0 +1,138 @@
+{% load static %}
+
+<style>
+.modal-content {
+    border-radius: 10px;
+}
+
+.form-container {
+    background-color: var(--bg-light);
+    padding: 24px;
+    border-radius: 10px;
+}
+
+.form-title {
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-title i {
+    color: var(--primary);
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-medium);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.2s;
+    color: var(--text-dark);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-fade);
+}
+
+textarea.form-control {
+    min-height: 100px;
+}
+
+.btn {
+    padding: 10px 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary-light);
+}
+
+.btn-secondary {
+    background-color: var(--text-medium);
+    border-color: var(--text-medium);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: var(--text-dark);
+    border-color: var(--text-dark);
+}
+
+/* Django form elements */
+form p {
+    margin-bottom: 20px;
+}
+
+form p label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-medium);
+}
+
+form p textarea,
+form p input[type="file"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.2s;
+    color: var(--text-dark);
+}
+
+form p textarea:focus,
+form p input[type="file"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-fade);
+}
+
+form p textarea {
+    min-height: 100px;
+}
+</style>
+
+<form method="post" enctype="multipart/form-data"
+      action="{% url 'edit_reply' form.instance.pk %}"
+      class="form-container">
+
+    <h5 class="form-title">
+        <i data-lucide="pencil" class="lucide" style="width: 20px; height: 20px;"></i>
+        Edit Reply
+    </h5>
+
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="text-end mt-4">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="button" class="btn btn-secondary ms-2" onclick="closeModal()">Cancel</button>
+    </div>
+</form>

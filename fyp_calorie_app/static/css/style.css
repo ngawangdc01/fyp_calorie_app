@@ -1,0 +1,226 @@
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/Roboto-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/Roboto-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+:root {
+    --primary: #D32F2F;
+    --primary-light: #F44336;
+    --primary-dark: #B71C1C;
+    --primary-fade: rgba(211, 47, 47, 0.1);
+    --secondary: #FFD600;
+    --text-dark: #212121;
+    --text-medium: #616161;
+    --text-light: #9E9E9E;
+    --bg-light: #F9F9F9;
+    --bg-white: #FFFFFF;
+    --border: #E0E0E0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}  
+
+.sidebar {
+    width: 280px;
+    background-color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    position: sticky;
+    top: 0;
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-title {
+    font-size: 1rem;
+    color: var(--text-medium);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+    padding-left: 0.75rem;
+}
+
+.sidebar .nav-link {
+    color: var(--text-dark);
+    border-radius: 8px;
+    padding: 0.75rem 0.75rem;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar .nav-link:hover {
+    color: var(--primary);
+    background-color: var(--primary-fade);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-fade);
+    color: var(--primary) !important;
+    font-weight: 600;
+}
+
+.sidebar .nav-icon {
+    width: 18px;
+    height: 18px;
+    color: currentColor;
+}
+
+.sidebar li {
+    list-style: none;
+}
+
+/* Add your popup styles here */
+.popup-messages-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+}
+
+.popup-message {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-white);
+    color: var(--text-dark);
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    position: relative;
+    animation: slideIn 0.3s ease forwards;
+    overflow: hidden;
+}
+
+.popup-icon {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.popup-content {
+    flex: 1;
+    padding-right: 24px;
+}
+
+.popup-message[data-tag="success"] {
+    border-left: 4px solid var(--primary);
+}
+
+.popup-message[data-tag="success"] .popup-icon {
+    color: var(--primary);
+}
+
+.popup-message[data-tag="error"] {
+    border-left: 4px solid var(--danger);
+}
+
+.popup-message[data-tag="error"] .popup-icon {
+    color: var(--danger);
+}
+
+.popup-message[data-tag="info"] {
+    border-left: 4px solid var(--info);
+}
+
+.popup-message[data-tag="info"] .popup-icon {
+    color: var(--info);
+}
+
+.popup-message[data-tag="warning"] {
+    border-left: 4px solid var(--warning);
+}
+
+.popup-message[data-tag="warning"] .popup-icon {
+    color: var(--warning);
+}
+
+.popup-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-light);
+    transition: all 0.2s;
+    border-radius: 50%;
+}
+
+.popup-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-dark);
+}
+
+.popup-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: var(--primary-fade);
+    width: 100%;
+}
+
+.popup-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--primary);
+    animation: progress 5s linear forwards;
+}
+
+.popup-message[data-tag="error"] .popup-progress::after {
+    background-color: var(--danger);
+}
+
+.popup-message[data-tag="info"] .popup-progress::after {
+    background-color: var(--info);
+}
+
+.popup-message[data-tag="warning"] .popup-progress::after {
+    background-color: var(--warning);
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOut {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(30px); }
+}
+
+@keyframes progress {
+    from { width: 100%; }
+    to   { width: 0%; }
+}

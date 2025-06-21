@@ -1,0 +1,223 @@
+{% load static %}
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    .modal-content {
+        border-radius: 10px;
+    }
+    
+    .form-container {
+        background-color: var(--bg-light);
+        padding: 24px;
+        border-radius: 10px;
+    }
+    
+    .form-title {
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-title i {
+        color: var(--primary);
+    }
+    
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-medium);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.2s;
+        color: var(--text-dark);
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-fade);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-light);
+        border-color: var(--primary-light);
+    }
+    
+    .btn-secondary {
+        background-color: var(--text-medium);
+        border-color: var(--text-medium);
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--text-dark);
+        border-color: var(--text-dark);
+    }
+    
+    /* Style Django form elements */
+    form p {
+        margin-bottom: 20px;
+    }
+    
+    form p label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-medium);
+    }
+    
+    form p input[type="text"],
+    form p input[type="file"],
+    form p textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.2s;
+        color: var(--text-dark);
+    }
+    
+    form p input[type="text"]:focus,
+    form p input[type="file"]:focus,
+    form p textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-fade);
+    }
+    
+    form p textarea {
+        min-height: 120px;
+    }
+
+    .image-preview-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .image-preview-wrapper img {
+        max-height: 300px;
+        border-radius: 8px;
+    }
+    
+    .remove-image-btn {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+<form method="post" enctype="multipart/form-data" action="{% url 'create_discussion' %}" class="form-container">
+    <h5 class="form-title">
+        <i data-lucide="pen-line" class="lucide" style="width: 20px; height: 20px;"></i>
+        Create Discussion
+    </h5>
+
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="id_title">Title</label>
+        <input type="text" name="title" id="id_title" class="form-control" placeholder="Title..." required>
+    </div>
+
+    <div class="form-group">
+        <label for="id_content">Content</label>
+        <textarea name="content" id="id_content" class="form-control" placeholder="Content..." rows="4" required></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Image</label>
+
+        <div id="image-input-wrapper">
+            <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
+        </div>
+
+        <div id="image-preview-wrapper" class="image-preview-wrapper" style="display: none;">
+            <img id="preview-img" src="#" alt="Preview image">
+            <button type="button" class="remove-image-btn" onclick="removePreviewImage()">×</button>
+        </div>
+    </div>
+
+    <div class="text-end mt-4">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="button" class="btn btn-secondary ms-2" onclick="closeModal()">Cancel</button>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('id_image');
+    const previewWrapper = document.getElementById('image-preview-wrapper');
+    const previewImg = document.getElementById('preview-img');
+    const inputWrapper = document.getElementById('image-input-wrapper');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    previewWrapper.style.display = 'block';
+                    inputWrapper.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+function removePreviewImage() {
+    const fileInput = document.getElementById('id_image');
+    const previewWrapper = document.getElementById('image-preview-wrapper');
+    const inputWrapper = document.getElementById('image-input-wrapper');
+
+    fileInput.value = '';
+    previewWrapper.style.display = 'none';
+    inputWrapper.style.display = 'block';
+}
+</script>

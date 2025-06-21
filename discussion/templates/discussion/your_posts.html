@@ -1,0 +1,282 @@
+{% extends "sidebar_layout.html" %}
+{% load static %}
+{% load time_display %}
+
+{% block title %}Your Posts{% endblock %}
+
+{% block page_content %}
+<style>
+    body {
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+    }
+    
+    section { 
+        margin-bottom: 32px; 
+        background-color: var(--bg-white);
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .summary-bar {
+        background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-bar h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .custom-tabs {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .custom-tabs a {
+        text-decoration: none;
+        font-size: 18px;
+        color: var(--text-dark);
+        padding-bottom: 5px;
+    }
+
+    .custom-tabs a.active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+        font-weight: bold;
+    }
+
+    .create-post-btn {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        font-size: 16px !important;
+        color: white;
+        text-decoration: none;
+    }
+
+    .custom-post {
+        border: 1px solid var(--border);
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: var(--bg-white);
+        transition: all 0.2s;
+    }
+
+    .custom-post:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 16px;
+    }
+
+    .post-date {
+        color: var(--text-light);
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .post-actions-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+    }
+
+    .post-actions-top a {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--text-medium);
+        transition: all 0.2s;
+    }
+
+    .post-actions-top a:hover {
+        color: var(--primary);
+    }
+
+    .custom-post h5 {
+        margin: 0 0 10px 0;
+        color: var(--text-dark);
+    }
+
+    .custom-post p {
+        margin-bottom: 15px;
+        color: var(--text-medium);
+    }
+
+    .replies-section {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid var(--border);
+    }
+
+    .reply-item {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background-color: var(--bg-light);
+    }
+
+    .reply-item p {
+        margin-bottom: 5px;
+    }
+
+    .toggle-btn {
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .reply-actions {
+        margin-top: 8px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .reply-actions a {
+        font-size: 13px;
+        color: var(--text-medium);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .reply-actions a:hover {
+        color: var(--primary);
+    }
+</style>
+
+<div class="summary-bar">
+    <h3>Discussion Forum</h3>
+    <a href="javascript:void(0);" class="create-post-btn" onclick="openModal('{% url 'create_discussion' %}')">
+        <span><i data-lucide="pen-line" class="lucide" style="width: 20px; height: 20px;"></i></span>
+        <span>Create a post</span>
+    </a>
+</div>
+
+<div class="custom-tabs">
+    <a href="{% url 'discussion_list' %}">Explore</a>
+    <a href="#" class="active">Your Posts</a>
+</div>
+
+{% for d in discussions %}
+    <div class="custom-post shadow-sm">
+        <div class="post-header">
+            <p class="post-date">
+                <!-- Posted on {{ d.created_at|date:"M d, Y H:i" }} -->
+                {{ d.created_at|compact_time }} {% if d.was_edited %}<em>(edited)</em>{% endif %}
+            </p>
+            <div class="post-actions-top">
+                <a href="javascript:void(0);" onclick="openModal('{% url 'edit_discussion' d.pk %}')">
+                    <i data-lucide="pencil" class="lucide" style="width: 16px; height: 16px;"></i> Edit
+                </a>
+                <a href="{% url 'delete_discussion' d.pk %}" onclick="return confirm('Are you sure you want to delete this post?');">
+                    <i data-lucide="trash-2" class="lucide" style="width: 16px; height: 16px;"></i> Delete
+                </a>
+            </div>
+        </div>
+
+        <h5 class="fw-bold">{{ d.title }}</h5>
+        <p>{{ d.content|truncatechars:200 }}</p>
+        
+        {% if d.image %}
+            <img src="{{ d.image.url }}" class="img-fluid rounded mb-3" style="max-height: 250px; width: 100%; object-fit: cover;">
+        {% endif %}
+        
+        {% if d.replies.exists %}
+            <div class="replies-section">
+                <strong>Comments ({{ d.replies.count }})</strong>
+                <div class="reply-list mt-3" id="replies-{{ d.id }}">
+                    {% for reply in d.replies.all %}
+                        <div class="reply-item {% if forloop.counter > 3 %}d-none extra-reply reply-{{ d.id }}{% endif %}">
+                            <p class="fw-semibold mb-2">
+                                {% if reply.user == request.user %}You{% else %}{{ reply.user.username }}{% endif %}
+                                <span class="text-muted small ms-2">{{ reply.created_at|compact_time }}</span>
+                                {% if reply.was_edited %}<span class="text-muted small">(edited)</span>{% endif %}
+                            </p>
+                            <p>{{ reply.content }}</p>
+                            {% if reply.image %}
+                                <img src="{{ reply.image.url }}" class="img-fluid rounded mt-2" style="max-height: 200px;">
+                            {% endif %}
+                            {% if reply.user == request.user %}
+                                <div class="reply-actions">
+                                    <a href="javascript:void(0);" onclick="openModal('{% url 'edit_reply' reply.id %}')">Edit</a>
+                                    <a href="javascript:void(0);" onclick="confirmDeleteReply({{ reply.id }})">Delete</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if d.replies.count > 3 %}
+                    <button class="toggle-btn mt-2" data-id="{{ d.id }}">Show All</button>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="empty-state text-center py-5">
+        <div class="empty-state-icon mb-3">
+            <i data-lucide="message-circle" class="lucide" style="width: 48px; height: 48px; color: var(--text-light);"></i>
+        </div>
+        <p class="empty-state-text">You haven't posted anything yet. <a href="javascript:void(0);" onclick="openModal('{% url 'create_discussion' %}')" style="color: var(--primary); text-decoration: none;">Create one now!</a></p>
+    </div>
+{% endfor %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".toggle-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const postId = btn.getAttribute("data-id");
+                const hiddenReplies = document.querySelectorAll(`.reply-${postId}`);
+                const isExpanded = btn.innerText === "Show Less";
+
+                hiddenReplies.forEach(el => el.classList.toggle("d-none"));
+                btn.innerText = isExpanded ? "Show All" : "Show Less";
+            });
+        });
+    });
+
+    function confirmDeleteReply(replyId) {
+        if (confirm('Delete this reply?')) {
+            fetch(`/discussions/reply/${replyId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // After successful delete, simply close modal and reload
+                    closeModal();
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete reply.');
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

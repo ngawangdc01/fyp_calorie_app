@@ -1,0 +1,194 @@
+{% extends "sidebar_layout.html" %}
+{% load static %}
+{% load time_display %}
+
+{% block title %}Explore Discussions{% endblock %}
+
+{% block page_content %}
+<style>
+    body {
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+    }
+
+    section { 
+        margin-bottom: 32px; 
+        background-color: var(--bg-white);
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .summary-bar {
+        background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-bar h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .custom-tabs {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .custom-tabs a {
+        text-decoration: none;
+        font-size: 18px;
+        color: var(--text-dark);
+        padding-bottom: 5px;
+    }
+
+    .custom-tabs a.active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+        font-weight: bold;
+    }
+
+    .create-post-btn {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        font-size: 16px !important;
+        color: white;
+        text-decoration: none;
+    }
+
+    .custom-post {
+        border: 1px solid var(--border);
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: var(--bg-white);
+        transition: all 0.2s;
+    }
+
+    .custom-post:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 16px;
+    }
+
+    .post-meta {
+        color: var(--text-light);
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .post-actions-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+    }
+
+    .post-actions-top a {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--text-medium);
+        transition: all 0.2s;
+    }
+
+    .post-actions-top a:hover {
+        color: var(--primary);
+    }
+
+    .custom-post h5 {
+        margin: 0 0 10px 0;
+        color: var(--text-dark);
+    }
+
+    .custom-post p {
+        margin-bottom: 15px;
+        color: var(--text-medium);
+    }
+
+    .reply-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-medium);
+        font-size: 14px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .reply-link:hover {
+        color: var(--primary);
+    }
+</style>
+
+<div class="summary-bar">
+    <h3>Discussion Forum</h3>
+    <a href="javascript:void(0);" class="create-post-btn" onclick="openModal('{% url 'create_discussion' %}')">
+        <span><i data-lucide="pen-line" class="lucide" style="width: 20px; height: 20px;"></i></span>
+        <span>Create a post</span>
+    </a>
+</div>
+
+<div class="custom-tabs">
+    <a href="#" class="active">Explore</a>
+    <a href="{% url 'your_posts' %}">Your Posts</a>
+</div>
+
+{% for d in discussions %}
+    <div class="custom-post shadow-sm">
+        <div class="post-header">
+            <p class="post-meta">
+                <strong>{% if d.user == request.user %}You{% else %}{{ d.user.username }}{% endif %}</strong>
+                • {{ d.created_at|compact_time }} {% if d.was_edited %}<em>(edited)</em>{% endif %}
+            </p>
+            {% if d.user == request.user %}
+            <div class="post-actions-top">
+                <a href="javascript:void(0);" onclick="openModal('{% url 'edit_discussion' d.pk %}')">
+                    <i data-lucide="pencil" class="lucide" style="width: 16px; height: 16px;"></i> Edit
+                </a>
+                <a href="{% url 'delete_discussion' d.pk %}" onclick="return confirm('Are you sure you want to delete this post?');">
+                    <i data-lucide="trash-2" class="lucide" style="width: 16px; height: 16px;"></i> Delete
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <h5 class="fw-bold">{{ d.title }}</h5>
+        <p>{{ d.content|truncatechars:200 }}</p>
+
+        {% if d.image %}
+            <img src="{{ d.image.url }}" class="img-fluid rounded mb-3" style="max-height: 250px; width: 100%; object-fit: cover;">
+        {% endif %}
+
+        <a href="javascript:void(0);" class="reply-link" onclick="openModal('{% url 'discussion_detail' d.pk %}')">
+            <span><i data-lucide="message-square-more" class="lucide" style="width: 18px; height: 18px;"></i></span>
+            <span>View Discussion</span>
+        </a>
+    </div>
+{% empty %}
+    <div class="empty-state text-center py-5">
+        <div class="empty-state-icon mb-3">
+            <i data-lucide="message-circle" class="lucide" style="width: 48px; height: 48px; color: var(--text-light);"></i>
+        </div>
+        <p class="empty-state-text">No discussions yet. <a href="javascript:void(0);" onclick="openModal('{% url 'create_discussion' %}')" style="color: var(--primary); text-decoration: none;">Start one now!</a></p>
+    </div>
+{% endfor %}
+{% endblock %}

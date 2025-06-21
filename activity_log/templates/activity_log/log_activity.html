@@ -1,0 +1,465 @@
+{% extends "sidebar_layout.html" %}
+{% load static %}
+{% block title %}Log Activity{% endblock %}
+
+{% block page_content %}
+<style>
+    body {
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+    }
+    
+    section { 
+        margin-bottom: 32px; 
+        background-color: var(--bg-white);
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .section-header {
+        padding: 18px 24px;
+        background-color: var(--bg-light);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .section-header i {
+        margin-right: 10px;
+        color: var(--primary);
+    }
+    
+    .section-content {
+        padding: 24px;
+    }
+    
+    .summary-bar {
+        background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .summary-bar h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+    
+    .summary-stats {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        opacity: 0.8;
+        margin: 0;
+    }
+    
+    table { 
+        width: 100%; 
+        border-collapse: separate; 
+        border-spacing: 0;
+    }
+    
+    th { 
+        padding: 16px; 
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-medium);
+        border-bottom: 2px solid var(--border);
+    }
+    
+    td { 
+        padding: 16px; 
+        border-bottom: 1px solid var(--border);
+        color: var(--text-dark);
+    }
+    
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    tbody tr:hover {
+        background-color: var(--primary-fade);
+    }
+
+    .description { width: 50%; }
+    .minutes, .calories { width: 20%; text-align: center; }
+    .action { width: 10%; text-align: center; }
+
+    .activity-icon {
+        background-color: var(--primary-fade);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+    }
+    
+    .activity-name {
+        display: flex;
+        align-items: center;
+    }
+
+    .add-exercise form {
+        padding-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-medium);
+    }
+
+    .add-exercise select, .add-exercise input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.2s;
+        color: var(--text-dark);
+    }
+    
+    .add-exercise select:focus, .add-exercise input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-fade);
+    }
+
+    .btn {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn:hover {
+        background-color: var(--primary-light);
+    }
+    
+    .btn-lg {
+        width: 100%;
+        font-size: 16px;
+        padding: 14px 20px;
+    }
+    
+    .icon-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .icon-button:hover {
+        background-color: var(--primary-fade);
+    }
+    
+    .delete-button:hover {
+        background-color: rgba(117, 117, 117, 0.1);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-light);
+    }
+    
+    .empty-state-icon {
+        font-size: 48px;
+        color: var(--border);
+        margin-bottom: 16px;
+    }
+    
+    .empty-state-text {
+        font-size: 16px;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+        background-color: var(--secondary);
+        color: var(--text-dark);
+    }
+    
+    /* Calories burned effect */
+    .calories {
+        position: relative;
+    }
+    
+    .calories::before {
+        font-size: 14px;
+        margin-right: 4px;
+    }
+</style>
+
+<!-- Activity Summary -->
+<div class="summary-bar">
+    <h3>Your Calorie Log</h3>
+    <div class="summary-stats">
+        <div class="stat-item">
+            <p class="stat-value">{{ logs_today|length }}</p>
+            <p class="stat-label">Activities</p>
+        </div>
+        <div class="stat-item">
+            <p class="stat-value">{{ total_minutes|floatformat:0 }}</p>
+            <p class="stat-label">Minutes</p>
+        </div>
+        <div class="stat-item">
+            <p class="stat-value">{{ total_calories|floatformat:0 }}</p>
+            <p class="stat-label">Calories</p>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Activities -->
+<section>
+    <div class="section-header" style="display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="clipboard-list" class="lucide" style="width: 20px; height: 20px;"></i>
+        <h4>Activities For</h4><div style="display: flex; align-items: center; gap: 6px;">
+            <a href="?date={{ previous_date|date:'Y-m-d' }}" class="icon-button" title="Previous Day">
+                <i data-lucide="chevron-left" class="lucide" style="width: 20px; height: 20px; color: #0d6efd;"></i>
+            </a>
+            
+            <label onclick="document.getElementById('datePicker1').showPicker()" style="cursor: pointer; font-size: 18px; font-weight: 600; color: var(--text-dark);">
+                {% if selected_date == today %}
+                    &nbsp;Today&nbsp;
+                {% else %}
+                    {{ selected_date|date:"d-M-Y" }}
+                {% endif %}
+                <input type="date" id="datePicker1" value="{{ selected_date|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}"
+                       onchange="handleDateChange('datePicker1')"
+                       style="position: absolute; opacity: 0; pointer-events: none;" />
+            </label>            
+            
+            {% if selected_date == today %}
+            <button class="icon-button" disabled style="cursor: not-allowed; opacity: 0.4;" title="Future date not allowed">
+                <i data-lucide="chevron-right" class="lucide" style="width: 20px; height: 20px; color: #0d6efd;"></i>
+            </button>
+            {% else %}
+            <a href="?date={{ next_date|date:'Y-m-d' }}" class="icon-button" title="Next Day">
+                <i data-lucide="chevron-right" class="lucide" style="width: 20px; height: 20px; color: #0d6efd;"></i>
+            </a>
+            {% endif %}            
+        </div>        
+    </div>
+    <div class="section-content">
+        <table>
+            <thead>
+                <tr>
+                    <th class="description">Activity</th>
+                    <th class="minutes">Minutes</th>
+                    <th class="calories">Calories Burned</th>
+                    <th class="action"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs_today %}
+                <tr>
+                    <td class="description">
+                        <div class="activity-name">
+                            <span class="activity-icon">
+                                <i data-lucide="activity" class="lucide" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                            </span>
+                            {{ log.activity.name }}
+                        </div>
+                    </td>
+                    <td class="minutes">{{ log.duration }}</td>
+                    <td class="calories">{{ log.calories_burned|floatformat:2 }}</td>
+                    <td class="action">
+                        <form method="post" action="{% url 'delete_activity_log' log.id %}">
+                            {% csrf_token %}
+                            <button class="icon-button delete-button" type="submit">
+                                <i data-lucide="trash-2" class="lucide" style="width: 18px; height: 18px; color: var(--danger);"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i data-lucide="dumbbell" class="lucide" style="width: 48px; height: 48px;"></i>
+                            </div>
+                            <p class="empty-state-text">No activity yet. Every move counts — start burning calories now!</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Recent Entries -->
+<section>
+    <div class="section-header" style="display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="history" class="lucide" style="width: 20px; height: 20px;"></i>
+        <h4>Recent Entries</h4>
+    </div>
+    <div class="section-content">
+        <table>
+            <thead>
+                <tr>
+                    <th class="description">Activity</th>
+                    <th class="minutes">Minutes</th>
+                    <th class="calories">Calories Burned</th>
+                    <th class="action"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs_recent %}
+                <tr>
+                    <td class="description">
+                        <div class="activity-name">
+                            <span class="activity-icon">
+                                <i data-lucide="activity" class="lucide" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                            </span>
+                            {{ log.activity.name }}
+                        </div>
+                    </td>
+                    <td class="minutes">{{ log.duration }}</td>
+                    <td class="calories">{{ log.calories_burned|floatformat:2 }}</td>
+                    <td class="action">
+                        <form method="post" action="{% url 'reuse_activity_log' log.id %}?date={{ selected_date|date:'Y-m-d' }}">
+                            {% csrf_token %}
+                            <button class="icon-button" type="submit">
+                                <i data-lucide="plus-circle" class="lucide" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <p class="empty-state-text">No recent activities found. Your workout history will appear here.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Add New Exercise -->
+<section id="add-exercise">
+    <div class="section-header" style="display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="plus" class="lucide" style="width: 20px; height: 20px;"></i>
+        <h4>Add New For</h4><div style="display: flex; align-items: center; gap: 6px;">
+            <a href="?date={{ previous_date|date:'Y-m-d' }}#add-exercise" class="icon-button" title="Previous Day">
+                <i data-lucide="chevron-left" class="lucide" style="width: 20px; height: 20px;  color: #0d6efd;"></i>
+            </a>
+            
+            <label onclick="document.getElementById('datePicker1').showPicker()" style="cursor: pointer; font-size: 18px; font-weight: 600; color: var(--text-dark);">
+                {% if selected_date == today %}
+                    Today
+                {% else %}
+                    {{ selected_date|date:"d-M-Y" }}
+                {% endif %}
+                <input type="date" id="datePicker1" value="{{ selected_date|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}"
+                       onchange="handleDateChange('datePicker1')"
+                       style="position: absolute; opacity: 0; pointer-events: none;" />
+            </label>            
+            
+            {% if selected_date == today %}
+            <button class="icon-button" disabled style="cursor: not-allowed; opacity: 0.4;" title="Future date not allowed">
+                <i data-lucide="chevron-right" class="lucide" style="width: 20px; height: 20px;  color: #0d6efd;"></i>
+            </button>
+            {% else %}
+            <a href="?date={{ next_date|date:'Y-m-d' }}#add-exercise" class="icon-button" title="Next Day">
+                <i data-lucide="chevron-right" class="lucide" style="width: 20px; height: 20px;  color: #0d6efd;"></i>
+            </a>
+            {% endif %}            
+        </div>
+        
+    </div>
+    <div class="section-content">
+        <form method="post" class="add-exercise">
+            {% csrf_token %}
+            {% for field in form %}
+                {% if field.name == 'logged_date' %}
+                    {{ field.as_hidden }}
+                {% else %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <button type="submit" class="btn btn-lg">
+                <i data-lucide="clipboard-check" class="lucide" style="width: 18px; height: 18px;"></i>
+                Log Activity
+            </button>
+        </form>
+    </div>
+</section>
+<script>
+    function handleDateChange(pickerId) {
+        const selected = document.getElementById(pickerId).value;
+        if (selected) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('date', selected);
+            window.location.href = url.toString();
+        }
+    }
+</script>
+{% endblock %}

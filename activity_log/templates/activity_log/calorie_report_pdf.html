@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Calorie Report</title>
+    <style>
+        @page { margin: 30px; }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #212121;
+            background-color: #FFFFFF;
+        }
+        h2 {
+            text-align: center;
+            color: #D32F2F;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 5px 0;
+        }
+        .section {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #DDD;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #AAA;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #F0F0F0;
+            font-weight: bold;
+        }
+        .stat-summary {
+            margin-top: 10px;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 10px;
+            color: #888;
+        }
+        img {
+            margin-top: 20px;
+            width: 500px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Calorie Report (Last {{ days }} Days)</h2>
+
+    <div class="section">
+        <p><strong>User:</strong> {{ user.username }}</p>
+        <p><strong>Report Generated:</strong> {{ today|date:"d F Y" }}</p>
+        <p><strong>Period:</strong> Last {{ days }} Days</p>
+    </div>
+
+    <div class="section stat-summary">
+        <p><strong>Total Activities:</strong> {{ activity_logs|length }}</p>
+        <p><strong>Total Minutes:</strong> {{ total_minutes|floatformat:0 }}</p>
+        <p><strong>Total Calories Burned:</strong> {{ total_calories|floatformat:0 }}</p>
+    </div>
+
+    <div class="section">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Activity</th>
+                    <th>Duration (min)</th>
+                    <th>Calories</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in activity_logs %}
+                <tr>
+                    <td>{{ log.logged_date|date:"d-M-Y" }}</td>
+                    <td>{{ log.activity.name }}</td>
+                    <td>{{ log.duration|floatformat:0 }}</td>
+                    <td>{{ log.calories_burned|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No activities logged during this period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if chart_image %}
+    <div class="section">
+        <p style="text-align:center;"><strong>Calories Burned Chart</strong></p>
+        <p style="text-align:center;"><img src="{{ chart_image }}" alt="Chart"></p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>This report was generated on {{ today|date:"d F Y" }}.</p>
+    </div>
+
+</body>
+</html>
