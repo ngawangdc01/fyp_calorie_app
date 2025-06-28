@@ -32,15 +32,52 @@ body {
 
 .sidebar {
     width: 280px;
-    background-color: white;
     height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1.5rem 1rem;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    background-color: white;
+    z-index: 1030;
+    padding: 1.5rem 1rem;
     box-shadow: 3px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+#main-content {
+    padding-top: 5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    transition: margin-left 0.3s ease;
+}
+
+/* .main-content-wrapper {
+    min-width: 768px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+} */
+
+/* @media (min-width: 768px) {
+    #main-content {
+        margin-left: 280px;
+    }
+} */
+
+@media (max-width: 767.98px) {
+    #main-content {
+        min-width: 768px;
+    }
+}
+
+.outer-scroll-wrapper {
+    overflow-x: auto;
+    /* overflow-y: hidden; */
+    width: 100%;
+}
+
+.inner-wrapper {
+    min-width: 768px; /* or 1000px if needed */
+    margin: 0 auto;
 }
 
 .sidebar-title {
@@ -224,3 +261,19 @@ body {
     from { width: 100%; }
     to   { width: 0%; }
 }
+
+/* @media (min-width: 768px) {
+    #sidebar {
+        width: 280px;
+    }
+
+    #main-content {
+        margin-left: 280px;
+    }
+}
+
+#sidebar,
+#main-content {
+    transition: all 0.3s ease;
+} */
+

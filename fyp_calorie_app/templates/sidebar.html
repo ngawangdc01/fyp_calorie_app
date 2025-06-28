@@ -1,24 +1,21 @@
-<div class="col-auto sidebar">
+<nav id="sidebar" class="sidebar bg-light h-100 overflow-auto">
     <div>
         <div class="sidebar-title">TRACK YOUR CALORIES</div>
         <ul class="nav flex-column">
             <li>
-                <a href="{% url 'log_activity' %}"
-                   class="nav-link {% if request.path == '/activity/log/' %}active{% endif %}">
+                <a href="{% url 'log_activity' %}" class="nav-link {% if request.path == '/activity/log/' %}active{% endif %}">
                    <i data-lucide="clipboard-list" class="nav-icon"></i>
                    Log Activity/Calorie
                 </a>
             </li>
             <li>
-                <a href="{% url 'calorie_report' %}"
-                   class="nav-link {% if request.path == '/activity/report/' %}active{% endif %}">
+                <a href="{% url 'calorie_report' %}" class="nav-link {% if request.path == '/activity/report/' %}active{% endif %}">
                    <i data-lucide="chart-no-axes-combined" class="nav-icon"></i>
                    View Calorie Report
                 </a>
             </li>
             <li>
-                <a href="{% url 'discussion_list' %}"
-                   class="nav-link {% if request.path == '/discussions/' %}active{% endif %}">
+                <a href="{% url 'discussion_list' %}" class="nav-link {% if request.path == '/discussions/' %}active{% endif %}">
                    <i data-lucide="users" class="nav-icon"></i>
                    Discussion Forum
                 </a>
@@ -46,4 +43,4 @@
             </a>
         </li>
     </div>
-</div>
+</nav>

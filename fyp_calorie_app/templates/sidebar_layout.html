@@ -185,11 +185,21 @@
 </div>
 {% endif %}
 
-<div class="container-fluid">
-    <div class="row min-vh-100">
-        {% include "sidebar.html" %}
-        <div class="col-md-9" style="padding: 5rem;">
-            {% block page_content %}{% endblock %}
+<button class="btn btn-outline-secondary d-md-none m-3" type="button" onclick="toggleSidebar()">
+    <i data-lucide="menu"></i> Menu
+</button>
+
+<div class="outer-scroll-wrapper">
+    <div class="inner-wrapper">
+        <div class="container">
+            <div class="row">
+                <div id="sidebar-col" class="d-none d-md-block col-md-3 col-lg-2">
+                    {% include "sidebar.html" %}
+                </div>
+                <div id="main-content" class="col-md-9 col-lg-10 mx-auto" style="padding-top: 5rem;">
+                    {% block page_content %}{% endblock %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -213,6 +223,16 @@
 </div>
 
 <script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar-col');
+        const content = document.getElementById('main-content');
+
+        sidebar.classList.toggle('d-none');
+        content.classList.toggle('col-md-9');
+        content.classList.toggle('col-lg-10');
+        content.classList.toggle('col-12');
+    }
+
     function openModal(contentUrl) {
         fetch(contentUrl, {
             headers: {
