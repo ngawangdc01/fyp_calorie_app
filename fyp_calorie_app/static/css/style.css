@@ -30,7 +30,7 @@ body {
     font-family: 'Roboto', sans-serif;
 }  
 
-.sidebar {
+/* .sidebar {
     width: 280px;
     height: 100vh;
     position: fixed;
@@ -40,28 +40,61 @@ body {
     z-index: 1030;
     padding: 1.5rem 1rem;
     box-shadow: 3px 0 10px rgba(0, 0, 0, 0.05);
+} */
+
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: white;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.05);
 }
 
+
 #main-content {
+  padding-top: 5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  transition: margin-left 0.3s ease;
+}
+
+/* On mobile: force min-width so horizontal scroll appears */
+@media (max-width: 767.98px) {
+  #main-content {
+    min-width: 768px;
+    margin: 0 auto;
+  }
+}
+
+/* On desktop: allow content to sit beside the fixed sidebar */
+@media (min-width: 768px) {
+  #main-content {
+    margin-left: 280px;
+    max-width: 100%;
+  }
+}
+
+.outer-scroll-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.inner-wrapper {
+  width: 100%;
+}
+
+/* #main-content {
     padding-top: 5rem;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
     transition: margin-left 0.3s ease;
 }
-
-/* .main-content-wrapper {
-    min-width: 768px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-} */
-
-/* @media (min-width: 768px) {
-    #main-content {
-        margin-left: 280px;
-    }
-} */
 
 @media (max-width: 767.98px) {
     #main-content {
@@ -71,14 +104,13 @@ body {
 
 .outer-scroll-wrapper {
     overflow-x: auto;
-    /* overflow-y: hidden; */
     width: 100%;
 }
 
 .inner-wrapper {
-    min-width: 768px; /* or 1000px if needed */
+    min-width: 768px;
     margin: 0 auto;
-}
+} */
 
 .sidebar-title {
     font-size: 1rem;

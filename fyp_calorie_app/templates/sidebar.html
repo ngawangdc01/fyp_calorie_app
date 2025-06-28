@@ -1,4 +1,6 @@
-<nav id="sidebar" class="sidebar bg-light h-100 overflow-auto">
+<nav id="sidebar" class="sidebar h-100 overflow-auto d-flex flex-column justify-content-between">
+
+    <!-- Top section -->
     <div>
         <div class="sidebar-title">TRACK YOUR CALORIES</div>
         <ul class="nav flex-column">
@@ -29,7 +31,8 @@
         </ul>
     </div>
 
-    <div class="nav flex-column mt-auto">
+    <!-- Bottom section -->
+    <ul class="nav flex-column">
         <li>
             <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                 <i data-lucide="user-circle" class="nav-icon"></i>
@@ -42,5 +45,6 @@
                 Logout
             </a>
         </li>
-    </div>
+    </ul>
+
 </nav>
