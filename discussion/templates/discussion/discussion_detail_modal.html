@@ -216,6 +216,28 @@
         font-size: 12px;
         cursor: pointer;
     }
+
+    /* Unified reply actions styling */
+    .reply-actions {
+        margin-top: 8px;
+        display: flex;
+        justify-content: flex-end;
+        /* gap: 2px; */
+    }
+
+    .reply-actions a {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        /* gap: 5px; */
+        color: var(--text-medium);
+        transition: all 0.2s;
+        font-size: 13px;
+    }
+
+    .reply-actions a:hover {
+        color: var(--primary);
+    }
     
     /* Hide any native scrollbar indicators while preserving functionality */
     ::-webkit-scrollbar {
@@ -273,9 +295,13 @@
                 {% endif %}
 
                 {% if reply.user == request.user %}
-                <div class="reply-actions mt-2 d-flex justify-content-end gap-2">
-                    <a href="javascript:void(0);" onclick="openModal('{% url 'edit_reply' reply.pk %}')" class="text-muted small">Edit</a>
-                    <a href="javascript:void(0);" onclick="confirmDeleteReply({{ reply.pk }})" class="text-muted small">Delete</a>
+                <div class="reply-actions">
+                    <a href="javascript:void(0);" onclick="openModal('{% url 'edit_reply' reply.pk %}')">
+                        <i data-lucide="pencil" class="lucide" style="width: 16px; height: 16px;"></i> Edit
+                    </a>
+                    <a href="javascript:void(0);" onclick="confirmDeleteReply({{ reply.pk }})">
+                        <i data-lucide="trash-2" class="lucide" style="width: 16px; height: 16px;"></i> Delete
+                    </a>
                 </div>
                 {% endif %}
             </div>

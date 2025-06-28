@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Discussion, Reply
 from .forms import DiscussionForm, ReplyForm
 from django.http import JsonResponse
@@ -9,7 +10,57 @@ from django.http import JsonResponse
 @login_required
 def discussion_list(request):
     discussions = Discussion.objects.all().order_by('-created_at')
-    return render(request, 'discussion/discussion_list.html', {'discussions': discussions})
+    
+    # Pagination
+    paginator = Paginator(discussions, 10)  # Show 10 discussions per page
+    page_number = request.GET.get('page')
+    
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page
+        page_obj = paginator.page(paginator.num_pages)
+    
+    # Calculate page range for display (show max 5 page buttons)
+    current_page = page_obj.number
+    total_pages = paginator.num_pages
+    
+    # Logic for displaying page numbers
+    if total_pages <= 5:
+        # If 5 or fewer pages, show all
+        page_range = range(1, total_pages + 1)
+        show_first_ellipsis = False
+        show_last_ellipsis = False
+    else:
+        # More than 5 pages, need to be selective
+        if current_page <= 3:
+            # Near the beginning
+            page_range = range(1, 4)
+            show_first_ellipsis = False
+            show_last_ellipsis = True
+        elif current_page >= total_pages - 2:
+            # Near the end
+            page_range = range(total_pages - 2, total_pages + 1)
+            show_first_ellipsis = True
+            show_last_ellipsis = False
+        else:
+            # In the middle
+            page_range = range(current_page - 1, current_page + 2)
+            show_first_ellipsis = True
+            show_last_ellipsis = True
+    
+    context = {
+        'discussions': page_obj,
+        'page_obj': page_obj,
+        'page_range': page_range,
+        'show_first_ellipsis': show_first_ellipsis,
+        'show_last_ellipsis': show_last_ellipsis,
+    }
+    
+    return render(request, 'discussion/discussion_list.html', context)
 
 # View user's own posts
 @login_required
@@ -17,7 +68,49 @@ def your_posts(request):
     discussions = Discussion.objects.filter(user=request.user)\
                                     .prefetch_related('replies')\
                                     .order_by('-created_at')
-    return render(request, 'discussion/your_posts.html', {'discussions': discussions})
+    
+    # Pagination for user's posts
+    paginator = Paginator(discussions, 10)  # Show 10 discussions per page
+    page_number = request.GET.get('page')
+    
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+    
+    # Calculate page range for display (show max 5 page buttons)
+    current_page = page_obj.number
+    total_pages = paginator.num_pages
+    
+    if total_pages <= 5:
+        page_range = range(1, total_pages + 1)
+        show_first_ellipsis = False
+        show_last_ellipsis = False
+    else:
+        if current_page <= 3:
+            page_range = range(1, 4)
+            show_first_ellipsis = False
+            show_last_ellipsis = True
+        elif current_page >= total_pages - 2:
+            page_range = range(total_pages - 2, total_pages + 1)
+            show_first_ellipsis = True
+            show_last_ellipsis = False
+        else:
+            page_range = range(current_page - 1, current_page + 2)
+            show_first_ellipsis = True
+            show_last_ellipsis = True
+    
+    context = {
+        'discussions': page_obj,
+        'page_obj': page_obj,
+        'page_range': page_range,
+        'show_first_ellipsis': show_first_ellipsis,
+        'show_last_ellipsis': show_last_ellipsis,
+    }
+    
+    return render(request, 'discussion/your_posts.html', context)
 
 # View a discussion (modal only)
 @login_required

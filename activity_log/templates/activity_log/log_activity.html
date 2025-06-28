@@ -323,7 +323,7 @@
                     <td class="minutes">{{ log.duration }}</td>
                     <td class="calories">{{ log.calories_burned|floatformat:2 }}</td>
                     <td class="action">
-                        <form method="post" action="{% url 'delete_activity_log' log.id %}">
+                        <form method="post" action="{% url 'delete_activity_log' log.id %}?date={{ selected_date|date:'Y-m-d' }}">
                             {% csrf_token %}
                             <button class="icon-button delete-button" type="submit">
                                 <i data-lucide="trash-2" class="lucide" style="width: 18px; height: 18px; color: var(--danger);"></i>

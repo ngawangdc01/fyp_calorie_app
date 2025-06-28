@@ -137,6 +137,101 @@
     .reply-link:hover {
         color: var(--primary);
     }
+
+    /* Custom pagination styles */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+    }
+
+    .pagination {
+        margin: 0;
+        gap: 8px; /* Space between buttons */
+    }
+
+    .page-item {
+        margin: 0; /* Remove default margin */
+    }
+
+    /* .page-link {
+        color: var(--primary);
+        border-color: #dee2e6;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        min-width: 44px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    } */
+
+    .page-link:hover {
+        color: var(--primary-dark);
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: #fff;
+        border-color: #dee2e6;
+        cursor: not-allowed;
+    }
+
+    .page-item.disabled .page-link:hover {
+        color: #6c757d;
+        background-color: #fff;
+        border-color: #dee2e6;
+    }
+
+    /* .pagination-ellipsis {
+        padding: 0.5rem 0.75rem;
+        color: #6c757d;
+        border: 1px solid transparent;
+        cursor: default;
+        min-width: 44px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    } */
+
+     .page-link {
+        color: var(--primary);
+        border-color: #dee2e6;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        min-width: 44px;
+        min-height: 44px; /* Add this line */
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pagination-ellipsis {
+        padding: 0.5rem 0.75rem;
+        color: #6c757d;
+        border: 1px solid transparent;
+        cursor: default;
+        min-width: 44px;
+        min-height: 44px; /* Add this line */
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 </style>
 
 <div class="summary-bar">
@@ -191,4 +286,70 @@
         <p class="empty-state-text">No discussions yet. <a href="javascript:void(0);" onclick="openModal('{% url 'create_discussion' %}')" style="color: var(--primary); text-decoration: none;">Start one now!</a></p>
     </div>
 {% endfor %}
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="pagination-container">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <!-- Previous button -->
+            <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                {% if page_obj.has_previous %}
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <i data-lucide="chevron-left" class="lucide" style="width: 18px; height: 18px;"></i>
+                    </a>
+                {% else %}
+                    <span class="page-link" aria-label="Previous">
+                        <i data-lucide="chevron-left" class="lucide" style="width: 18px; height: 18px;"></i>
+                    </span>
+                {% endif %}
+            </li>
+
+            <!-- First page link (if not in current range) -->
+            {% if show_first_ellipsis and page_range.0 != 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">1</a>
+                </li>
+                <li class="page-item">
+                    <span class="pagination-ellipsis">...</span>
+                </li>
+            {% endif %}
+
+            <!-- Page number links -->
+            {% for page_num in page_range %}
+                <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                    {% if page_num == page_obj.number %}
+                        <span class="page-link">{{ page_num }}</span>
+                    {% else %}
+                        <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+
+            <!-- Last page link (if not in current range) -->
+            {% if show_last_ellipsis and page_range|last != page_obj.paginator.num_pages %}
+                <li class="page-item">
+                    <span class="pagination-ellipsis">...</span>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                </li>
+            {% endif %}
+
+            <!-- Next button -->
+            <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                {% if page_obj.has_next %}
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <i data-lucide="chevron-right" class="lucide" style="width: 18px; height: 18px;"></i>
+                    </a>
+                {% else %}
+                    <span class="page-link" aria-label="Next">
+                        <i data-lucide="chevron-right" class="lucide" style="width: 18px; height: 18px;"></i>
+                    </span>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endif %}
 {% endblock %}

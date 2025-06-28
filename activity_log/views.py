@@ -117,15 +117,30 @@ def log_activity(request):
         # include any other context (totals, recent logs) as before
     })
 
+# @login_required
+# def delete_activity_log(request, log_id): # ltr, for fe part need to refresh to the selected date instead of today
+#     try:
+#         log = get_object_or_404(ActivityLog, id=log_id, user=request.user)
+#         log.delete()
+#         messages.success(request, "Activity log deleted.")
+#     except Exception as e:
+#         messages.error(request, f"Failed to delete activity log: {str(e)}")
+#     return redirect('log_activity')
+
 @login_required
-def delete_activity_log(request, log_id): # ltr, for fe part need to refresh to the selected date instead of today
+def delete_activity_log(request, log_id):
+    selected_date_str = request.GET.get("date")
+    selected_date = date.today() if not selected_date_str else date.fromisoformat(selected_date_str)
+
     try:
         log = get_object_or_404(ActivityLog, id=log_id, user=request.user)
         log.delete()
         messages.success(request, "Activity log deleted.")
     except Exception as e:
         messages.error(request, f"Failed to delete activity log: {str(e)}")
-    return redirect('log_activity')
+
+    return redirect(f"{reverse('log_activity')}?date={selected_date}")
+
 
 @login_required
 def reuse_activity_log(request, log_id):
