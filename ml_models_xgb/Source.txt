@@ -1,0 +1,4 @@
+Getting Started with the Calories Burned Dataset
+https://www.kaggle.com/code/aadhavvignesh/getting-started-with-the-calories-burned-dataset/notebook
+
+This Notebook has been released under the Apache 2.0 open source license.
